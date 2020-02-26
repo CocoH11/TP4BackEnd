@@ -67,12 +67,12 @@
 
     buttonConnexion.click(function(){
        inscriptionEnabled=false;
-       accountfieldset.css('display', 'none');
+       accountfieldset.hide();
     });
 
     buttonRegister.click(function () {
         inscriptionEnabled=true;
-        accountfieldset.css('display', 'block');
+        accountfieldset.show();
     });
 
     buttonSend.click(function(){
@@ -101,7 +101,7 @@
         $.post("http://localhost:8000/login", { login: loginfield.value, passwd: passwdfield.value  }).done(function (result) {
             if (!result) {
                 console.log("Tu es connecté!!");
-
+                $('form').hide();
                 json = $.ajax({
                     url: 'https://api.flickr.com/services/feeds/photos_public.gne',
                     dataType: 'jsonp',
