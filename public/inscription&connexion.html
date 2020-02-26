@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css" >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" ></script>
+    <title>Inscription&Connexion</title>
+</head>
+<body>
+<ul class="nav nav-pills">
+<li class="nav-item">
+    <a class="nav-link" href="#" id="navconnexionindicator">Connexion</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="#" id="navregisterindicator">Inscription</a>
+</li>
+</ul>
+<form>
+    <fieldset>
+        <legend>Informations de connexion</legend>
+        <div class="form-group">
+            <input type="text" name="loginfield" value="" placeholder="login" id="loginfield">
+            <div class="alert alert-danger" role="alert">
+                Minimum 8 caractères
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="password" name="passwdfield" value="" placeholder="password" id="passwdfield">
+        </div>
+    </fieldset>
+    <fieldset id="accountfieldset">
+        <legend>Informations du compte</legend>
+        <div class="form-group">
+            <label for="namefield">Nom</label>
+            <input type="text" name="namefield" value="" id="namefield">
+        </div>
+        <div class="form-group">
+            <label for="firstnamefield">Prénom</label>
+            <input type="text" name="firstnamefield" value="" id="firstnamefield">
+        </div>
+        <div class="form-group">
+            <label for="emailfield">E-mail</label>
+            <input type="text" name="emailfield" value="" id="emailfield">
+        </div>
+    </fieldset>
+
+    <input type="button" value="Connexion" onclick="" id="sendbutton">
+</form>
+<section id="news" class="container">
+    <div class="row"></div>
+</section>
+
+<script>
+    let inscriptionEnabled=false,
+        error,
+    buttonRegister=$("#navregisterindicator"),
+    buttonConnexion=$("#navconnexionindicator"),
+    buttonSend=$("#sendbutton"),
+    accountfieldset=$("#accountfieldset"),
+    loginfield=$("#loginfield")[0],
+    firstnamefield=$('#firstnamefield')[0],
+    namefield=$('#namefield')[0],
+    emailfield=$('#emailfield')[0],
+    json;
+
+    buttonConnexion.click(function(){
+       inscriptionEnabled=false;
+       accountfieldset.css('display', 'none');
+    });
+
+    buttonRegister.click(function () {
+        inscriptionEnabled=true;
+        accountfieldset.css('display', 'block');
+    });
+
+    buttonSend.click(function(){
+        if (inscriptionEnabled) {
+            registration();
+        }else{ connexion();}
+    });
+
+    function registration() {
+        //console.log(namefield.value);
+        $.post("http://localhost:8000/register", {
+            login: loginfield.value,
+            password: passwdfield.value,
+            email: emailfield.value,
+            name: namefield.value,
+            firstname: firstnamefield.value,
+            token: this.token
+        }).done(function(result){
+            if (result.empty())console.log("tu es connecté");
+        }).fail(function (result) {
+            console.log(result);
+        })
+    }
+
+    function connexion() {
+        $.post("http://localhost:8000/login", { login: loginfield.value, passwd: passwdfield.value  }).done(function (result) {
+            if (!result) {
+                console.log("Tu es connecté!!");
+
+                json = $.ajax({
+                    url: 'https://api.flickr.com/services/feeds/photos_public.gne',
+                    dataType: 'jsonp',
+                    data: {"tags": "besancon", "format": "json", "tagmode": "any"}
+                });
+            }});
+    }
+
+    function checkLogin() {
+        if ((loginfield.value).length<2){
+            loginfield.css("border-color", "red");
+            $('.alert').alert()
+        }else{
+            $('.alert').alert('close');
+            loginfield.css("border-color", "green");
+        }
+    }
+
+    function createErrorMessage(){
+       error=$("<p>");
+       error.addClass(["alert", "alert-danger"]);
+       error.setAttribute("role", "alert");
+
+    }
+
+    function jsonFlickrFeed(json) {
+        console.log(json);
+        $.each(json.items, function(i, item) {
+            cardcontainer=$("<div>").addClass("card").css("width", "150px");
+            cardimage=$("<img>").attr("src", item.media.m).addClass("card-img");
+            cardtitle=$("<h4>").text(item.title).addClass("card-title");
+            cardlinkImage=$("<a>").attr("href", item.link).text("flickr").addClass("card-link");
+            cardbody=$("<div>").append(cardtitle);
+            cardcontainer.append(cardimage);
+            cardcontainer.append(cardbody);
+            cardcontainer.append(cardlinkImage);
+            cardcontainer.appendTo(".row");
+        });
+    }
+
+
+
+
+
+</script>
+
+</body>
+</html>
